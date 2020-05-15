@@ -1,0 +1,555 @@
+\chapter{Интерполирование кривой на~двумерной сфере}
+
+\section*{\texttt{AbstractSphereCurveCreator.java}}
+\begin{verbatim}
+package com.ran.engine.factories.interpolation.curvecreators;
+
+// Импорт классов
+// ...
+
+public abstract class AbstractSphereCurveCreator extends AbstractInterpolatedCurveCreator<
+        ThreeDoubleVector, ThreeDoubleVector, SimpleInputParameters> {
+
+    @Override
+    protected void validateVerticesList(List<ThreeDoubleVector> verticesList) {
+        super.validateVerticesList(verticesList);
+        double radius = verticesList.get(0).getNorm();
+        if (verticesList.stream().anyMatch(vertice -> ArithmeticOperations.doubleNotEquals(
+                vertice.getNorm(), radius))) {
+            throw new InterpolationException("All vertices must belong to the same sphere");
+        }
+    }
+
+    protected DoubleFunction<ThreeDoubleVector> buildFinalCurve(
+            List<Double> timeMoments,
+            List<ThreeDoubleVector> vertices,
+            List<DoubleFunction<DoubleMatrix>> rotationsOnSegments,
+            int segmentsQuantity) {
+        TimeMomentsUtil timeMomentsUtil = TimeMomentsUtil.getInstance();
+        List<DoubleFunction<ThreeDoubleVector>> curveSegments =
+            new ArrayList<>(segmentsQuantity);
+        for (int i = 0; i < segmentsQuantity; i++) {
+            double startTime = timeMoments.get(i);
+            double endTime = timeMoments.get(i + 1);
+            DoubleFunction<DoubleMatrix> currentRotation = rotationsOnSegments.get(i);
+            DoubleVector currentVertice = vertices.get(i).getDoubleVector();
+            DoubleFunction<ThreeDoubleVector> curveSegmentWithoutAligning = new DoubleFunction<>(
+                    point -> new ThreeDoubleVector(currentRotation.apply(point)
+                        .multiply(currentVertice)), 0.0, 1.0
+            );
+            DoubleFunction<ThreeDoubleVector> alignedCurveSegment =
+                    curveSegmentWithoutAligning.superposition(
+                        timeMomentsUtil.buildAligningFunction(startTime, endTime));
+            curveSegments.add(alignedCurveSegment);
+        }
+        return DoubleMultifunction.makeMultifunction(curveSegments);
+    }
+}
+\end{verbatim}
+
+\section*{\texttt{ArcsBuilder.java}}
+\begin{verbatim}
+package com.ran.engine.factories.interpolation.tools;
+
+// Импорт классов
+// ...
+
+public class ArcsBuilder {
+
+    private static final ArcsBuilder INSTANCE = new ArcsBuilder();
+
+    public static ArcsBuilder getInstance() {
+        return INSTANCE;
+    }
+
+    public Result buildArcsBetweenVerticesOnSphere(
+            ThreeDoubleVector p1, ThreeDoubleVector p2, ThreeDoubleVector p3) {
+        ThreeDoubleVector a = (p3.substract(p2)).multiply(p1.substract(p2));
+        double aNorm = a.getNorm();
+        if (ArithmeticOperations.doubleEquals(aNorm, 0.0)) {
+            throw new AlgebraicException("Every three sequential vertices must not coincide");
+        }
+
+        double mixedProduction = p1.mixedMultiply(p2, p3);
+        ThreeDoubleVector n = a.multiply(1.0 / aNorm);
+        ThreeDoubleVector c = n.multiply(mixedProduction / aNorm);
+
+        ThreeDoubleVector r1 = p1.substract(c);
+        ThreeDoubleVector r2 = p2.substract(c);
+        ThreeDoubleVector r3 = p3.substract(c);
+
+        ThreeDoubleVector n1 = r1.multiply(r2);
+        ThreeDoubleVector n2 = r2.multiply(r3);
+
+        double n1Norm = n1.getNorm();
+        double n2Norm = n2.getNorm();
+        double s1 = r1.scalarMultiply(r2);
+        double s2 = r2.scalarMultiply(r3);
+
+        double firstAtan2 = Math.atan2(n1Norm, s1);
+        double phi = -(n1.scalarMultiply(n) > 0 ? firstAtan2 : 2 * Math.PI - firstAtan2);
+
+        double secondAtan2 = Math.atan2(n2Norm, s2);
+        double psi = -(n2.scalarMultiply(n) > 0 ? secondAtan2 : 2 * Math.PI - secondAtan2);
+
+        return new Result(
+                new DoubleFunction<>(point -> RotationCreator.getInstance()
+                    .createRotation(n, point * phi), 0.0, 1.0),
+                new DoubleFunction<>(point -> RotationCreator.getInstance()
+                    .createRotation(n, point * psi), 0.0, 1.0),
+                phi, psi);
+    }
+
+    public static class Result {
+        private final DoubleFunction<DoubleMatrix> firstRotation;
+        private final DoubleFunction<DoubleMatrix> secondRotation;
+        private final double firstAngle;
+        private final double secondAngle;
+
+        // Конструкторы, get- и set-методы
+    }
+}
+\end{verbatim}
+
+\section*{\texttt{SphereByPointsCurveCreator.java}}
+\begin{verbatim}
+package com.ran.engine.factories.interpolation.curvecreators;
+
+// Импорт классов
+// ...
+
+public class SphereByPointsCurveCreator extends AbstractSphereCurveCreator {
+
+    private static final SphereByPointsCurveCreator INSTANCE = new SphereByPointsCurveCreator();
+
+    public static SphereByPointsCurveCreator getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public DoubleFunction<ThreeDoubleVector> interpolateCurve(List<ThreeDoubleVector> vertices,
+                                                              SimpleInputParameters parameters,
+                                                              int degree) {
+        validateVerticesList(vertices);
+
+        double t0 = parameters.getT0();
+        double t1 = parameters.getT1();
+        int k = vertices.size();
+
+        CurvesDeformationCreator deformationCreator = CurvesDeformationCreator.getInstance();
+        ArcsBuilder arcsBuilder = ArcsBuilder.getInstance();
+        TimeMomentsUtil timeMomentsUtil = TimeMomentsUtil.getInstance();
+
+        List<DoubleFunction<DoubleMatrix>> rotationsOnSegments = new ArrayList<>(k - 1);
+        List<Pair<Double, Double>> rotationAngles = new ArrayList<>(k - 2);
+        ArcsBuilder.Result currentArcsBuildingResult =
+                arcsBuilder.buildArcsBetweenVerticesOnSphere(
+                    vertices.get(0), vertices.get(1), vertices.get(2));
+        rotationsOnSegments.add(currentArcsBuildingResult.getFirstRotation());
+        rotationAngles.add(currentArcsBuildingResult.getAngles());
+
+        for (int i = 1; i < k - 2; i++) {
+            ArcsBuilder.Result nextArcsBuildingResult =
+                    arcsBuilder.buildArcsBetweenVerticesOnSphere(
+                        vertices.get(i), vertices.get(i + 1), vertices.get(i + 2));
+            DoubleFunction<DoubleMatrix> deformedFunction = deformationCreator.deformCurves(
+                    currentArcsBuildingResult.getSecondRotation(),
+                    nextArcsBuildingResult.getFirstRotation(), degree);
+            rotationsOnSegments.add(deformedFunction);
+            rotationAngles.add(nextArcsBuildingResult.getAngles());
+            currentArcsBuildingResult = nextArcsBuildingResult;
+        }
+        rotationsOnSegments.add(currentArcsBuildingResult.getSecondRotation());
+
+        List<Double> timeMoments = timeMomentsUtil.countTimeMoments(rotationAngles, t0, t1, k);
+        return buildFinalCurve(timeMoments, vertices, rotationsOnSegments, k - 1);
+    }
+}
+\end{verbatim}
+
+\section*{\texttt{BigArcsBuilder.java}}
+\begin{verbatim}
+package com.ran.engine.factories.interpolation.tools;
+
+// Импорт классов
+// ...
+
+public class BigArcsBuilder {
+
+    private static final BigArcsBuilder INSTANCE = new BigArcsBuilder();
+
+    public static BigArcsBuilder getInstance() {
+        return INSTANCE;
+    }
+
+    public Result buildBigArcBetweenVerticesOnSphere(
+            ThreeDoubleVector p1, ThreeDoubleVector p2) {
+        ThreeDoubleVector a = p1.multiply(p2);
+        double aNorm = a.getNorm();
+        if (ArithmeticOperations.doubleEquals(aNorm, 0.0)) {
+            throw new AlgebraicException("Every two sequential vertices must not coincide");
+        }
+
+        ThreeDoubleVector n = a.multiply(1.0 / aNorm);
+        double phi = -Math.atan(aNorm / p1.scalarMultiply(p2));
+
+        return new BigArcsBuilder.Result(
+                new DoubleFunction<>(point -> RotationCreator.getInstance()
+                    .createRotation(n, point * phi), 0.0, 1.0), phi);
+    }
+
+    public static class Result {
+        private final DoubleFunction<DoubleMatrix> rotation;
+        private final double angle;
+
+        // Конструкторы, get- и set-методы
+    }
+}
+\end{verbatim}
+
+\section*{\texttt{SphereBezierCurveCreator.java}}
+\begin{verbatim}
+package com.ran.engine.factories.interpolation.curvecreators;
+
+// Импорт классов
+// ...
+
+public class SphereBezierCurveCreator extends AbstractSphereCurveCreator {
+
+    private static final SphereBezierCurveCreator INSTANCE =
+        new SphereBezierCurveCreator();
+
+    public static SphereBezierCurveCreator getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public DoubleFunction<ThreeDoubleVector> interpolateCurve(
+            List<ThreeDoubleVector> verticesList,
+            SimpleInputParameters parameters, int degree) {
+        validateVerticesList(verticesList);
+
+        double t0 = parameters.getT0();
+        double t1 = parameters.getT1();
+        int k = verticesList.size();
+
+        CurvesSmoothingCreator curvesSmoothingCreator = CurvesSmoothingCreator.getInstance();
+        BigArcsBuilder bigArcsBuilder = BigArcsBuilder.getInstance();
+
+        List<ThreeDoubleVector> arcsCenters = new ArrayList<>(k - 1);
+        for (int i = 0; i < k - 1; i++) {
+            BigArcsBuilder.Result bigArcsBuilderResult =
+                bigArcsBuilder.buildBigArcBetweenVerticesOnSphere(
+                    verticesList.get(i), verticesList.get(i + 1));
+            arcsCenters.add(new ThreeDoubleVector(bigArcsBuilderResult.getRotation().apply(0.5)
+                    .multiply(verticesList.get(i).getDoubleVector())));
+        }
+
+        List<DoubleFunction<DoubleMatrix>> halfRotationsForward = new ArrayList<>(k - 1);
+        List<DoubleFunction<DoubleMatrix>> halfRotationsBack = new ArrayList<>(k - 1);
+        for (int i = 0; i < k - 1; i++) {
+            BigArcsBuilder.Result firstHalfBigArcsBuilderResult = bigArcsBuilder
+                .buildBigArcBetweenVerticesOnSphere(
+                    verticesList.get(i), arcsCenters.get(i));
+            halfRotationsForward.add(firstHalfBigArcsBuilderResult.getRotation());
+            BigArcsBuilder.Result secondHalfBigArcsBuilderResult = bigArcsBuilder
+                .buildBigArcBetweenVerticesOnSphere(
+                    verticesList.get(i + 1), arcsCenters.get(i));
+            halfRotationsBack.add(secondHalfBigArcsBuilderResult.getRotation());
+        }
+
+        List<DoubleFunction<DoubleMatrix>> smoothedRotations = new ArrayList<>(k);
+        smoothedRotations.add(halfRotationsForward.get(0));
+        for (int i = 1; i < k - 1; i++) {
+            smoothedRotations.add(curvesSmoothingCreator.smoothCurves(
+                    halfRotationsBack.get(i - 1), halfRotationsForward.get(i), degree));
+        }
+        smoothedRotations.add(new DoubleFunction<>(
+                point -> halfRotationsBack.get(k - 2).apply(1.0 - point),
+                0.0, 1.0)
+        );
+
+        List<Double> timeMoments = new ArrayList<>(k + 1);
+        double timeDelta = t1 - t0;
+        for (int i = 0; i < k + 1; i++) {
+            timeMoments.add(t0 + i * timeDelta);
+        }
+        return buildFinalCurve(timeMoments, verticesList, smoothedRotations, k);
+    }
+}
+\end{verbatim}
+
+\section*{\texttt{TangentBuilder.java}}
+\begin{verbatim}
+package com.ran.engine.factories.interpolation.tools;
+
+// Импорт классов
+// ...
+
+public class TangentBuilder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TangentBuilder.class);
+
+    private static final TangentBuilder INSTANCE = new TangentBuilder();
+    private static final DoubleMatrix Z_HALF_PI_ROTATION = RotationCreator.getInstance()
+        .createRotation(ThreeDoubleVector.Z_ONE_THREE_DOUBLE_VECTOR, -Math.PI / 2.0);
+
+    public static TangentBuilder getInstance() {
+        return INSTANCE;
+    }
+
+    public Result buildTangent(ThreeDoubleVector point,
+                               double tangentAngle,
+                               Double forwardRotationAngle,
+                               Double backRotationAngle) {
+        LOG.trace("point = {}, tangentAngle = {}, forwardRotationAngle = {}, " +
+            "backRotationAngle = {}", point, tangentAngle, forwardRotationAngle,
+            backRotationAngle);
+        ThreeDoubleVector a, b;
+        if (ArithmeticOperations.doubleEquals(point.getX(), 0.0) &&
+                ArithmeticOperations.doubleEquals(point.getY(), 0.0)) {
+            a = ThreeDoubleVector.X_ONE_THREE_DOUBLE_VECTOR;
+            if (point.getZ() > 0.0) {
+                b = ThreeDoubleVector.MINUS_Y_ONE_THREE_DOUBLE_VECTOR;
+            } else {
+                b = ThreeDoubleVector.Y_ONE_THREE_DOUBLE_VECTOR;
+            }
+        } else {
+            a = new ThreeDoubleVector(Z_HALF_PI_ROTATION.multiply(
+                    new ThreeDoubleVector(point.getX(), point.getY(), 0.0)
+                        .getDoubleVector())).normalized();
+            b = point.multiply(a).normalized();
+        }
+        ThreeDoubleVector n = a.multiply(Math.sin(tangentAngle))
+            .add(b.multiply(-Math.cos(tangentAngle)));
+        LOG.trace("a = {}, b = {}, n = {}", a, b, n);
+
+        DoubleFunction<DoubleMatrix> forwardRotation = null;
+        DoubleFunction<DoubleMatrix> backRotation = null;
+
+        if (forwardRotationAngle != null) {
+            forwardRotation = new DoubleFunction<>(
+                    u -> RotationCreator.getInstance().createRotation(
+                        n, u * forwardRotationAngle),
+                    0.0, 1.0);
+        }
+        if (backRotationAngle != null) {
+            backRotation = new DoubleFunction<>(
+                    u -> RotationCreator.getInstance().createRotation(n, -u * backRotationAngle),
+                    0.0, 1.0);
+        }
+        return new Result(forwardRotation, backRotation, forwardRotationAngle,
+            backRotationAngle);
+    }
+
+    public static class Result {
+        private final DoubleFunction<DoubleMatrix> forwardRotation;
+        private final DoubleFunction<DoubleMatrix> backRotation;
+        private final Double forwardAngle, backAngle;
+
+        // Конструкторы, get- и set-методы
+    }
+}
+\end{verbatim}
+
+\section*{\texttt{SphereByTangentAnglesCurveCreator.java}}
+\begin{verbatim}
+package com.ran.engine.factories.interpolation.curvecreators;
+
+// Импорт классов
+// ...
+
+public class SphereByTangentAnglesCurveCreator extends AbstractInterpolatedCurveCreator<
+        Pair<ThreeDoubleVector, Double>, ThreeDoubleVector, SimpleInputParameters> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(
+        SphereByTangentAnglesCurveCreator.class);
+
+    private static final SphereByTangentAnglesCurveCreator INSTANCE =
+        new SphereByTangentAnglesCurveCreator();
+
+    public static SphereByTangentAnglesCurveCreator getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public DoubleFunction<ThreeDoubleVector> interpolateCurve(
+            List<Pair<ThreeDoubleVector, Double>> verticesWithTangentAnglesList,
+            SimpleInputParameters parameters, int degree) {
+        LOG.trace("verticesWithTangentAnglesList = {}, parameters = {}, degree = {}",
+                verticesWithTangentAnglesList, parameters, degree);
+        validateVerticesList(verticesWithTangentAnglesList);
+
+        double t0 = parameters.getT0();
+        double t1 = parameters.getT1();
+        int k = verticesWithTangentAnglesList.size();
+        LOG.trace("t0 = {}, t1 = {}, k = {}", t0, t1, k);
+
+        CurvesDeformationCreator deformationCreator = CurvesDeformationCreator.getInstance();
+        ArcsBuilder arcsBuilder = ArcsBuilder.getInstance();
+        BigArcsBuilder bigArcsBuilder = BigArcsBuilder.getInstance();
+        TangentBuilder tangentBuilder = TangentBuilder.getInstance();
+        TimeMomentsUtil timeMomentsUtil = TimeMomentsUtil.getInstance();
+
+        LOG.trace("Before calling ArcsBuilder");
+        List<ArcsBuilder.Result> smallArcsResults = new ArrayList<>(k - 2);
+        for (int i = 1; i < k - 1; i++) {
+            smallArcsResults.add(arcsBuilder.buildArcsBetweenVerticesOnSphere(
+                    verticesWithTangentAnglesList.get(i - 1).getLeft(),
+                    verticesWithTangentAnglesList.get(i).getLeft(),
+                    verticesWithTangentAnglesList.get(i + 1).getLeft()
+            ));
+        }
+        LOG.trace("smallArcsResults = {}", smallArcsResults);
+
+        LOG.trace("Before calling BigArcsBuilder");
+        List<BigArcsBuilder.Result> bigArcsResults = new ArrayList<>(k - 1);
+        for (int i = 0; i < k - 1; i++) {
+            bigArcsResults.add(bigArcsBuilder.buildBigArcBetweenVerticesOnSphere(
+                    verticesWithTangentAnglesList.get(i).getLeft(),
+                    verticesWithTangentAnglesList.get(i + 1).getLeft()
+            ));
+        }
+        LOG.trace("bigArcsResults = {}", bigArcsResults);
+
+        LOG.trace("Before calling TangentBuilder");
+        List<TangentBuilder.Result> tangentBuilderResults = new ArrayList<>(k);
+        for (int i = 0; i < k; i++) {
+            LOG.trace("Point #{} = {}", i, verticesWithTangentAnglesList.get(i));
+            if (verticesWithTangentAnglesList.get(i).getRight() == null) {
+                LOG.trace("Tangle angle is null");
+                tangentBuilderResults.add(null);
+            } else {
+                LOG.trace("Processing angles");
+                Double forwardAngle = null, backAngle = null;
+                if (i + 1 < k) {
+                    if (verticesWithTangentAnglesList.get(i + 1).getRight() != null ||
+                            i + 1 == k - 1) {
+                        forwardAngle = Math.abs(bigArcsResults.get(i).getAngle());
+                    } else {
+                        forwardAngle = Math.abs(smallArcsResults.get(i).getFirstAngle());
+                    }
+                }
+                if (i - 1 >= 0) {
+                    if (verticesWithTangentAnglesList.get(i - 1).getRight() != null ||
+                            i - 1 == 0) {
+                        backAngle = Math.abs(bigArcsResults.get(i - 1).getAngle());
+                    } else {
+                        backAngle = Math.abs(smallArcsResults.get(i - 2).getSecondAngle());
+                    }
+                }
+                LOG.trace("forwardAngle = {}, backAngle = {}", forwardAngle, backAngle);
+                tangentBuilderResults.add(tangentBuilder.buildTangent(
+                        verticesWithTangentAnglesList.get(i).getLeft(),
+                        verticesWithTangentAnglesList.get(i).getRight(),
+                        forwardAngle,
+                        backAngle
+                ));
+            }
+        }
+
+        List<Pair<Double, Double>> rotationAngles = new ArrayList<>(k - 2);
+        for (int i = 0; i < k - 2; i++) {
+            if (verticesWithTangentAnglesList.get(i + 1).getRight() == null) {
+                rotationAngles.add(smallArcsResults.get(i).getAngles());
+            } else {
+                rotationAngles.add(tangentBuilderResults.get(i + 1).getAngles());
+            }
+        }
+        LOG.trace("rotationAngles = {}", rotationAngles);
+
+        LOG.trace("Before building rotationsOnSegments");
+        List<DoubleFunction<DoubleMatrix>> rotationsOnSegments = new ArrayList<>(k - 1);
+        for (int i = 0; i < k - 1; i++) {
+            LOG.trace("Building rotation between points {} and {}: {} and {}",
+                    i, i + 1, verticesWithTangentAnglesList.get(i),
+                    verticesWithTangentAnglesList.get(i + 1));
+            if (verticesWithTangentAnglesList.get(i).getRight() != null &&
+                    verticesWithTangentAnglesList.get(i + 1).getRight() != null) {
+                LOG.trace("Angles are set on both points");
+                DoubleFunction<DoubleMatrix> firstDeformedCurve = deformationCreator
+                        .deformCurves(
+                        tangentBuilderResults.get(i).getForwardRotation(),
+                        bigArcsResults.get(i).getRotation(), degree);
+                DoubleFunction<DoubleMatrix> secondDeformedCurve = deformationCreator
+                        .deformCurvesWithCommonEnd(
+                        bigArcsResults.get(i).getRotation(),
+                        tangentBuilderResults.get(i + 1).getBackRotation(), degree);
+                rotationsOnSegments.add(deformationCreator.deformCurves(
+                        firstDeformedCurve, secondDeformedCurve, degree));
+            } else if (verticesWithTangentAnglesList.get(i).getRight() != null) {
+                LOG.trace("Angle is set only on the first point");
+                if (i == k - 2) {
+                    rotationsOnSegments.add(deformationCreator.deformCurves(
+                            tangentBuilderResults.get(i).getForwardRotation(),
+                            bigArcsResults.get(i).getRotation(), degree));
+                } else {
+                    rotationsOnSegments.add(deformationCreator.deformCurves(
+                            tangentBuilderResults.get(i).getForwardRotation(),
+                            smallArcsResults.get(i).getFirstRotation(), degree));
+                }
+            } else if (verticesWithTangentAnglesList.get(i + 1).getRight() != null) {
+                LOG.trace("Angle is set only on the second point");
+                if (i == 0) {
+                    rotationsOnSegments.add(deformationCreator.deformCurvesWithCommonEnd(
+                            bigArcsResults.get(i).getRotation(),
+                            tangentBuilderResults.get(i + 1).getBackRotation(), degree));
+                } else {
+                    rotationsOnSegments.add(deformationCreator.deformCurvesWithCommonEnd(
+                            smallArcsResults.get(i - 1).getSecondRotation(),
+                            tangentBuilderResults.get(i + 1).getBackRotation(), degree));
+                }
+            } else {
+                LOG.trace("Angles are not set on both points");
+                if (i == 0) {
+                    rotationsOnSegments.add(smallArcsResults.get(i).getFirstRotation());
+                } else if (i == k - 2) {
+                    rotationsOnSegments.add(smallArcsResults.get(i - 1).getSecondRotation());
+                } else {
+                    rotationsOnSegments.add(deformationCreator.deformCurves(
+                            smallArcsResults.get(i - 1).getSecondRotation(),
+                            smallArcsResults.get(i).getFirstRotation(), degree));
+                }
+            }
+        }
+
+        List<Double> timeMoments = timeMomentsUtil.countTimeMoments(rotationAngles, t0, t1, k);
+        LOG.trace("timeMoments = {}", timeMoments);
+
+        LOG.trace("Before building curveSegments");
+        List<DoubleFunction<ThreeDoubleVector>> curveSegments = new ArrayList<>(k - 1);
+        for (int i = 0; i < k - 1; i++) {
+            LOG.trace("Building curve between {} and {} points");
+            double startTime = timeMoments.get(i);
+            double endTime = timeMoments.get(i + 1);
+            DoubleFunction<DoubleMatrix> currentRotation = rotationsOnSegments.get(i);
+            DoubleVector currentVertice = verticesWithTangentAnglesList.get(i).getLeft()
+                .getDoubleVector();
+            LOG.trace("startTime = {}, endTime = {}, currentVertice = {}", startTime, endTime,
+                currentVertice);
+            DoubleFunction<ThreeDoubleVector> curveSegmentWithoutAligning = new DoubleFunction<>(
+                    point -> new ThreeDoubleVector(currentRotation.apply(point)
+                        .multiply(currentVertice)), 0.0, 1.0);
+            DoubleFunction<ThreeDoubleVector> alignedCurveSegment =
+                    curveSegmentWithoutAligning.superposition(timeMomentsUtil
+                        .buildAligningFunction(startTime, endTime));
+            curveSegments.add(alignedCurveSegment);
+        }
+        return DoubleMultifunction.makeMultifunction(curveSegments);
+    }
+
+    @Override
+    protected void validateVerticesList(
+            List<Pair<ThreeDoubleVector, Double>> verticesWithTangentAnglesList) {
+        super.validateVerticesList(verticesWithTangentAnglesList);
+        double radius = verticesWithTangentAnglesList.get(0).getLeft().getNorm();
+        if (verticesWithTangentAnglesList.stream().anyMatch(
+                verticeWithTangentAngle -> ArithmeticOperations.doubleNotEquals(
+                    verticeWithTangentAngle.getLeft().getNorm(), radius))) {
+            String message = "All vertices must belong to the same sphere";
+            LOG.error(message);
+            throw new InterpolationException(message);
+        }
+    }
+}
+\end{verbatim}
