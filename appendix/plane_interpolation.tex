@@ -1,10 +1,10 @@
-\chapter{Интерполирование кривой на~плоскости}
+\chapter{РРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°РЅРёРµ РєСЂРёРІРѕР№ РЅР°~РїР»РѕСЃРєРѕСЃС‚Рё}
 
 \section*{\texttt{AbstractPlainCurveCreator.java}}
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public abstract class AbstractPlainCurveCreator extends AbstractInterpolatedCurveCreator<
@@ -16,7 +16,7 @@ public abstract class AbstractPlainCurveCreator extends AbstractInterpolatedCurv
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class CircleArcsBuilder {
@@ -98,7 +98,7 @@ public class CircleArcsBuilder {
         private final double firstArcLength;
         private final double secondArcLength;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -107,7 +107,7 @@ public class CircleArcsBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class PlaneByPointsCurveCreator extends AbstractPlainCurveCreator {
@@ -204,7 +204,7 @@ public class SegmentsBuilder {
         private final DoubleFunction<TwoDoubleVector> segment;
         private final double length;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -213,7 +213,7 @@ public class SegmentsBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class PlaneBezierCurveCreator extends AbstractPlainCurveCreator {
@@ -288,7 +288,7 @@ public class PlaneBezierCurveCreator extends AbstractPlainCurveCreator {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class TangentSegmentBuilder {
@@ -329,7 +329,7 @@ public class TangentSegmentBuilder {
         private Double forwardLength;
         private Double backLength;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -338,7 +338,7 @@ public class TangentSegmentBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class PlaneByTangentAnglesCurveCreator extends AbstractInterpolatedCurveCreator<

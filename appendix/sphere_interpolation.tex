@@ -1,10 +1,10 @@
-\chapter{Интерполирование кривой на~двумерной сфере}
+\chapter{РРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°РЅРёРµ РєСЂРёРІРѕР№ РЅР°~РґРІСѓРјРµСЂРЅРѕР№ СЃС„РµСЂРµ}
 
 \section*{\texttt{AbstractSphereCurveCreator.java}}
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public abstract class AbstractSphereCurveCreator extends AbstractInterpolatedCurveCreator<
@@ -51,7 +51,7 @@ public abstract class AbstractSphereCurveCreator extends AbstractInterpolatedCur
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class ArcsBuilder {
@@ -106,7 +106,7 @@ public class ArcsBuilder {
         private final double firstAngle;
         private final double secondAngle;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -115,7 +115,7 @@ public class ArcsBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class SphereByPointsCurveCreator extends AbstractSphereCurveCreator {
@@ -171,7 +171,7 @@ public class SphereByPointsCurveCreator extends AbstractSphereCurveCreator {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class BigArcsBuilder {
@@ -202,7 +202,7 @@ public class BigArcsBuilder {
         private final DoubleFunction<DoubleMatrix> rotation;
         private final double angle;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -211,7 +211,7 @@ public class BigArcsBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class SphereBezierCurveCreator extends AbstractSphereCurveCreator {
@@ -283,7 +283,7 @@ public class SphereBezierCurveCreator extends AbstractSphereCurveCreator {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class TangentBuilder {
@@ -347,7 +347,7 @@ public class TangentBuilder {
         private final DoubleFunction<DoubleMatrix> backRotation;
         private final Double forwardAngle, backAngle;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -356,7 +356,7 @@ public class TangentBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class SphereByTangentAnglesCurveCreator extends AbstractInterpolatedCurveCreator<

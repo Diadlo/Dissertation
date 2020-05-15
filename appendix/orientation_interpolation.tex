@@ -1,10 +1,10 @@
-\chapter{Интерполирование кривой на~ориентационной сфере}
+\chapter{РРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°РЅРёРµ РєСЂРёРІРѕР№ РЅР°~РѕСЂРёРµРЅС‚Р°С†РёРѕРЅРЅРѕР№ СЃС„РµСЂРµ}
 
 \section*{\texttt{AbstractOrientationCurveCreator.java}}
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public abstract class AbstractOrientationCurveCreator extends AbstractInterpolatedCurveCreator<
@@ -48,7 +48,7 @@ public abstract class AbstractOrientationCurveCreator extends AbstractInterpolat
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class OrientationArcsBuilder {
@@ -115,7 +115,7 @@ public class OrientationArcsBuilder {
         private final double firstAngle;
         private final double secondAngle;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -124,7 +124,7 @@ public class OrientationArcsBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class OrientationByPointsCurveCreator extends AbstractOrientationCurveCreator {
@@ -181,7 +181,7 @@ public class OrientationByPointsCurveCreator extends AbstractOrientationCurveCre
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class OrientationBigArcsBuilder {
@@ -208,7 +208,7 @@ public class OrientationBigArcsBuilder {
         private DoubleFunction<Quaternion> rotation;
         private double angle;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -217,7 +217,7 @@ public class OrientationBigArcsBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class OrientationBezierCurveCreator extends AbstractOrientationCurveCreator {
@@ -281,7 +281,7 @@ public class OrientationBezierCurveCreator extends AbstractOrientationCurveCreat
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.tools;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class TangentOrientationBuilder {
@@ -348,7 +348,7 @@ public class TangentOrientationBuilder {
         private final DoubleFunction<Quaternion> backRotation;
         private final Double forwardAngle, backAngle;
 
-        // Конструкторы, get- и set-методы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹, get- Рё set-РјРµС‚РѕРґС‹
     }
 }
 \end{verbatim}
@@ -357,7 +357,7 @@ public class TangentOrientationBuilder {
 \begin{verbatim}
 package com.ran.engine.factories.interpolation.curvecreators;
 
-// Импорт классов
+// РРјРїРѕСЂС‚ РєР»Р°СЃСЃРѕРІ
 // ...
 
 public class OrientationByTangentAnglesCurveCreator extends AbstractInterpolatedCurveCreator<
