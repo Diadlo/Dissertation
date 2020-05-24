@@ -1,35 +1,80 @@
-\documentclass[14pt, a4paper]{report}
+%\documentclass[14pt, a4paper]{report}
+\documentclass[a4paper,14pt,oneside,openany]{memoir}
 
 \usepackage[14pt]{extsizes}
 \usepackage[utf8]{inputenc}
 \usepackage[T2A]{fontenc}
 \usepackage[russian]{babel}
-\usepackage{amsfonts}
-\usepackage{amsmath}
+
+\usepackage{amsthm,amsmath,amscd}   % Математические дополнения от AMS
+\usepackage{amsfonts,amssymb}       % Математические дополнения от AMS
+\usepackage{mathtools}              % Добавляет окружение multlined
+\usepackage{xfrac}                  % Красивые дроби
+
 \usepackage{graphicx}
+\usepackage{caption}                % Подписи рисунков и таблиц
+\usepackage{subcaption}             % Подписи подрисунков и подтаблиц
+\usepackage{pdfpages}               % Добавление внешних pdf файлов
+
 \usepackage{indentfirst}
+\usepackage{geometry}   % Для последующего задания полей
+
+\geometry{a4paper, top=2cm, bottom=2cm, left=2.5cm, right=1cm, nofoot, nomarginpar}
+
+\tolerance 1414
+\hbadness 1414
+\emergencystretch 1.5em % В случае проблем регулировать в первую очередь
+\hfuzz 0.3pt
+\vfuzz \hfuzz
+%\raggedbottom
+%\sloppy                 % Избавляемся от переполнений
+\clubpenalty=10000      % Запрещаем разрыв страницы после первой строки абзаца
+\widowpenalty=10000     % Запрещаем разрыв страницы после последней строки абзаца
+\brokenpenalty=4991     % Ограничение на разрыв страницы, если строка заканчивается переносом
+
 \graphicspath{{pictures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 
-\hoffset=-5.4mm
-\oddsidemargin=0mm
-\textwidth=180mm
-\voffset=-5.4mm
-\topmargin=0mm
-\headheight=5mm
-\headsep=7mm
-\textheight=235mm
-\footskip=10mm
-\parindent=12.5mm
+\newlength{\curtextsize}
+\newlength{\bigtextsize}
+\setlength{\bigtextsize}{13.9pt}
 
-\pagestyle{myheadings}
+%\pagestyle{myheadings}
 \makeatletter
-\renewcommand{\@oddhead}{}
-\renewcommand{\@oddfoot}{\hfil\thepage\hfil}
 
-\newtheorem{definition}{Определение}
-\newtheorem{theorem}{Теорема}
-\newtheorem{consequence}{Следствие}
+%%% Оглавление %%%
+\renewcommand{\cftchapterdotsep}{\cftdotsep}                % отбивка точками до номера страницы начала главы/раздела
 
-\DeclareMathOperator{\vers}{vers}
-\DeclareMathOperator{\arctantwo}{arctan2}
+%% Переносить слова в заголовке не допускается (ГОСТ Р 7.0.11-2011, 5.3.5). Заголовки в оглавлении должны точно повторять заголовки в тексте (ГОСТ Р 7.0.11-2011, 5.2.3). Прямого указания на запрет переносов в оглавлении нет, но по той же логике невнесения искажений в смысл, лучше в оглавлении не переносить:
+\setrmarg{2.55em plus1fil}                             %To have the (sectional) titles in the ToC, etc., typeset ragged right with no hyphenation
+\renewcommand{\cftchapterpagefont}{\normalfont}        % нежирные номера страниц у глав в оглавлении
+\renewcommand{\cftchapterleader}{\cftdotfill{\cftchapterdotsep}}% нежирные точки до номеров страниц у глав в оглавлении
+%\renewcommand{\cftchapterfont}{}                       % нежирные названия глав в оглавлении
+
+\renewcommand*{\cftappendixname}{\appendixname\space} % Слово Приложение в оглавлении
+
+%%% Колонтитулы %%%
+% Порядковый номер страницы печатают на середине верхнего поля страницы (ГОСТ Р 7.0.11-2011, 5.3.8)
+\makeevenhead{plain}{}{\thepage}{}
+\makeoddhead{plain}{}{\thepage}{}
+\makeevenfoot{plain}{}{}{}
+\makeoddfoot{plain}{}{}{}
+\pagestyle{plain}
+
+\newcommand*{\tocheader}{
+	\ifnumequal{\value{pgnum}}{1}{%
+		\ifendTOC\else\hbox to \linewidth%
+		{\noindent{}~\hfill{Стр.}}\par%
+		\ifnumless{\value{page}}{3}{}{%
+			\vspace{0.5\onelineskip}
+		}
+		\afterpage{\tocheader}
+		\fi%
+	}{}%
+}%
+
+%%% Оформление заголовков глав, разделов, подразделов %%%
+%% Работа должна быть выполнена ... размером шрифта 12-14 пунктов (ГОСТ Р 7.0.11-2011, 5.3.8). То есть не должно быть надписей шрифтом более 14. Так и поставим.
+%% Эти установки будут давать одинаковый результат независимо от выбора базовым шрифтом 12 пт или 14 пт
+\newcommand{\basegostsectionfont}{\fontsize{14pt}{16pt}\selectfont\bfseries}
+
