@@ -14,9 +14,6 @@
     \node[block] (ctrl) [above of=server] {Приложение управления};
     \node[block] (user) [above of=ctrl] {Пользователь};
 
-    % Right between ctrl and lib
-    \coordinate (X) at ($(ctrl)!0.5!(lib)$);
-
     \path[]
         (app)     edge[bend left]     node[left]  {1} (preload)
         (preload) edge[bend left=5]   node[below] {2} (server)
@@ -28,8 +25,7 @@
         (ctrl)    edge[bend left]     node[right] {8} (server)
         (server)  edge[bend left=5]   node[above] {9} (preload)
 
-        (server.north east)  edge[-,bend right=20] (X.south)
-        (X.north) edge[bend left=30] node[above] {10} (x11)
+        (server.north east)  edge    node[above]{10} (x11)
 
         (x11)     edge[bend left]     node[right] {11} (lib)
         (lib)     edge[bend left]     node[right] {12} (preload)
