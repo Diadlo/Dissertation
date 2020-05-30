@@ -2,8 +2,6 @@
 \documentclass[a4paper,14pt,oneside,openany]{memoir}
 
 \usepackage[14pt]{extsizes}
-\usepackage[utf8]{inputenc}
-\usepackage[T2A]{fontenc}
 \usepackage[russian]{babel}
 
 \usepackage{amsthm,amsmath,amscd}   % Математические дополнения от AMS
@@ -19,6 +17,9 @@
 \usepackage{indentfirst}
 \usepackage{geometry}   % Для последующего задания полей
 \usepackage{enumitem}   % Для ссылок на нумерованные списки
+
+\usepackage{minted}
+\setminted{fontsize=\small,baselinestretch=1}
 
 \usepackage[]{algorithm2e} % Для псевдокода + перевод ключевых слов
 \SetKwInput{KwData}{Исходные параметры}
@@ -42,24 +43,24 @@
 \usepackage{tikz}
 \usetikzlibrary{automata,arrows,chains,shapes.geometric,positioning,calc}
 
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\setmainfont{Times New Roman}
+\setromanfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Courier New}
+
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
+\newfontfamily\cyrillicfont{Times New Roman}
+\newfontfamily{\cyrillicfontrm}{Times New Roman}
+\newfontfamily{\cyrillicfontsf}{Arial}
+\newfontfamily{\cyrillicfonttt}{Courier New}
 
 \geometry{a4paper, top=20mm, bottom=20mm, left=30mm, right=15mm}
 
 \usepackage{titlesec}
 \newcommand{\sectionbreak}{\clearpage} % section new page
-
-\tolerance 1414
-\hbadness 1414
-\emergencystretch 1.5em % В случае проблем регулировать в первую очередь
-\hfuzz 0.3pt
-\vfuzz \hfuzz
-%\raggedbottom
-%\sloppy                 % Избавляемся от переполнений
-\clubpenalty=10000      % Запрещаем разрыв страницы после первой строки абзаца
-\widowpenalty=10000     % Запрещаем разрыв страницы после последней строки абзаца
-\brokenpenalty=4991     % Ограничение на разрыв страницы, если строка заканчивается переносом
 
 \graphicspath{{pictures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
