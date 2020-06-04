@@ -5,4 +5,9 @@
 *.dvi
 *.fdb_latexmk
 *.fls
-_minted-dissertation
+_minted-*
+*.csv
+*.nav
+*.out
+*.snm
+*.vrb
