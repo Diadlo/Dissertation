@@ -1,0 +1,19 @@
+\begin{tikzpicture}
+	\begin{filecontents*}{injected.csv}
+		num,timeout
+		1,28
+		10,162.818
+		20,305.143
+		30,448.323
+		40,610.171
+		50,779.235
+	\end{filecontents*}
+
+	\begin{axis}[height=6.5cm, width=9cm,
+				 grid=both,
+				 legend pos=outer north east,
+				 xlabel=Число окон, ylabel=Время открытия окна (мс)]
+		\addlegendentry{Время открытия}
+		\addplot table [x=num, y=timeout, col sep=comma] {injected.csv};
+	\end{axis}
+\end{tikzpicture}
