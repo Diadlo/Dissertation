@@ -1,0 +1,20 @@
+\begin{sequencediagram}
+	\newthread{app}{\shortstack{Целевое\\приложение}}
+	\newinst[1.3]{lib}{\shortstack{Подгружаемый\\модуль}}
+	\newinst[1.3]{qt}{Qt}
+	\newinst[2]{x11}{X11}
+	\newthread{server}{Сервер}
+	
+	\postlevel
+	\postlevel
+	\begin{call}{app}{\shortstack{Перехват создания\\элемента}}{lib}{}
+		\mess{lib}{Оповещение о создании элемента}{server}
+		
+		\postlevel
+		\postlevel
+		\begin{call}{lib}{\shortstack{Оригинальный\\вызов}}{qt}{}
+			\begin{call}{qt}{\shortstack{Отображение\\элемента}}{x11}{}
+			\end{call}
+		\end{call}
+	\end{call}
+\end{sequencediagram}

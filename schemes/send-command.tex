@@ -1,0 +1,16 @@
+\begin{sequencediagram}
+	\newthread{ctrl}{\shortstack{Приложение\\управления}}
+	\newinst[2]{server}{Сервер}
+	\newinst[2]{lib}{\shortstack{Подгружаемый\\модуль}}
+	\newinst{x11}{X11}
+
+	\postlevel
+	\postlevel
+	\begin{call}{ctrl}{\shortstack{Пользователь\\выбрал команду}}{server}{}
+		\begin{messcall}{server}{\shortstack{Передача команды\\активации}}{lib}{}
+		\end{messcall}
+		\postlevel
+		\begin{messcall}{server}{Активация окна}{x11}{}
+		\end{messcall}
+	\end{call}
+\end{sequencediagram}

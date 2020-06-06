@@ -1,0 +1,54 @@
+\section{Архитектура системы}
+
+Вся работа системы может быть рассмотрена в 3х частях:
+\begin{enumerate}
+    \item регистрация нового элемента в приложении;
+    \item посылка команды;
+    \item активация элемента.
+\end{enumerate}
+
+\begin{figure}
+	\centering
+	\input{schemes/create-element}
+	\caption{Общий обзор архитектуры}\label{fig:arch}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\input{schemes/send-command}
+	\caption{Общий обзор архитектуры}\label{fig:arch}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\input{schemes/activate-element}
+	\caption{Общий обзор архитектуры}\label{fig:arch}
+\end{figure}
+
+Подходящая архитектура для такой задачи была предложена мной в одной из прошлых
+работ\cite{polshakovinject}. На рис.~\ref{fig:arch} изображена схема
+взаимодействия данного комплекса программ. На схеме изображены следующие
+действия:
+\begin{enumerate}
+    \item Перехват функции создания элемента интерфейса
+    \item Оповещение о создании элемента
+    \item Вызов оригинальной функции графической библиотеки
+    \item Отображение элемента управления
+    \item Передача информации об элементе приложению управления
+    \item Отображение палитры команд
+    \item Выбор команды
+    \item Вызов функции для выполнения команды
+    \item Передача команды к выполнению
+    \item Вызов функции активации окна целевого приложения
+    \item Активация окна
+    \item Перехват функции обработки события
+    \item Вызов функции обработки события
+    \item Вызов функции для выполнения команды
+    \item Выполнение команды
+\end{enumerate}
+
+\begin{figure}
+	\centering
+	\input{schemes/arch} \\
+	\caption{Общий обзор архитектуры}\label{fig:arch}
+\end{figure}

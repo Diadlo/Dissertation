@@ -1,0 +1,23 @@
+\begin{sequencediagram}
+	\newthread{x11}{X11}
+	\newinst[1.3]{qt}{Qt}
+	\newinst[1.3]{lib}{\shortstack{Подгружаемый\\модуль}}
+	\newinst{app}{\shortstack{Целевое\\приложение}}
+
+	\postlevel
+	\postlevel
+	\begin{call}{x11}{\shortstack{Активация\\окна}}{qt}{}
+		\begin{call}{qt}{\shortstack{Перехват\\события}}{lib}{}
+			\begin{call}{lib}{\shortstack{Передача\\события}}{app}{}
+			\end{call}
+			\begin{call}{lib}{\shortstack{Инициация\\команды}}{qt}{}
+				\postlevel
+				\begin{call}{qt}{\shortstack{Обработка}}{qt}{}
+					\postlevel
+					\begin{call}{qt}{\shortstack{Выполнение\\команды}}{app}{}
+					\end{call}
+				\end{call}
+			\end{call}
+		\end{call}
+	\end{call}
+\end{sequencediagram}
