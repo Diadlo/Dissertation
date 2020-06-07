@@ -1,0 +1,21 @@
+\begin{tikzpicture}[
+        ->,>=stealth',node
+        distance=2cm, semithick
+    ]
+
+    \tikzstyle{block} = [rectangle,draw,minimum height=0.8cm]
+
+    \node[block] (main) {MainWidget};
+    \node[block] (runview)   [below right=1cm and 0cm of main] {RunView};
+    \node[block] (ctrlview)  [below left =1cm and 0cm of main] {ControlView};
+    \node[block] (server)    [below of=ctrlview] {Server};
+    \node[block] (runner)    [below of=runview]  {Runner};
+
+    \path[]
+        (main)     edge (runview)
+        (main)     edge (ctrlview)
+        (runview)  edge (runner)
+        (ctrlview) edge (server)
+    ;
+
+\end{tikzpicture}
