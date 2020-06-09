@@ -24,26 +24,40 @@
 \graphicspath{{../pictures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 
+\usepackage{pdfpages}
+
+\usepackage{svg}
+\svgpath{../pictures}
+
 \usepackage{tikz}
 \usetikzlibrary{automata,arrows,chains,shapes.geometric,positioning,calc}
 
-\title[Thesis]{Исследование возможности использования подмены библиотеки для реализация палитры команд}
+\title[Thesis]{Исследование возможности добавления палитры команд
+в произвольные приложения\\c использованием фреймворка Qt}
 \author{Студент: Польшаков Д.В. \\ Научный руководитель: Чернышов М.К.}
 \institute{ВГУ}
 \date{\the\year}
 
 \begin{document}
 	
-\frame{\titlepage}
-
-\begin{frame}{Палитра команд}
-	Это специальное окно в интерфейсе приложения, где отображаются все доступные
-	функции. Иногда рядом с описанием функции отображается горячая клавиша для
-	её активации.
+\begin{frame}[plain]
+	\titlepage
 \end{frame}
 
-\begin{frame}{Палитра команд в VS Code}
-	\centering
+\begin{frame}{Постановка задачи}
+	Разработать набор программ, которые в комплексе будут решать следующие
+	задачи:
+	
+	\begin{itemize}
+		\item Запускать целевые приложения в специальном окружении
+		\item Отображать пользователю окно для поиска и выбора элемента
+		\item Собирать информацию о существующих элементах графического приложения
+		\item Сохранять информацию о всех запущенных приложениях
+		\item Активировать выбранный пользователем элемент
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Палитра команд}
 	\includegraphics[width=\textwidth]{vscode}
 \end{frame}
 
@@ -52,7 +66,7 @@
 	\includegraphics[height=0.9\textheight]{Plotinus}
 \end{frame}
 
-\begin{frame}{Qt}
+\begin{frame}{Фреймворк Qt}
     \begin{columns}
 		\column{0.38\linewidth}
 		\centering
@@ -60,89 +74,56 @@
 		\column{0.58\linewidth}
 		\textbf{Qt}~— кроссплатформенный фреймворк для разработки программного обеспечения на языке программирования C++. Включает в себя в т.ч. классы для разработки
 		графического интерфейса.
-	\end{columns}	
+	\end{columns}
 \end{frame}
 
-\begin{frame}{Добавление логики в приложение}
-	\textbf{Способы добавления дополнительной логики в приложение}
+\begin{frame}{Добавление функциональности в приложение}
+	\textbf{Способы добавления дополнительной функциональности в приложение}
 	\begin{itemize}
-		\item добавление функции на этапе сборки приложения
-		\item добавление функции в момент выполнения программы
+		\item Добавление функции на этапе сборки приложения
+		\item Добавление функции в момент выполнения программы
 		\begin{itemize}
-			\item с помощью загрузка плагинов
-			\item с помощью подмены библиотек
+			\item С помощью загрузка плагинов
+			\item С помощью подмены библиотек
 		\end{itemize}
 	\end{itemize}
 \end{frame}
 
-\iffalse
 \begin{frame}{Взаимодействие элементов GUI и пользователя}
 	\begin{figure}
-		\input{../schemes/gui.tex}
+		\input{schemes/gui.tex}
 	\end{figure}
 \end{frame}
-\fi
 
-\begin{frame}{Постановка задачи}
-	Разработать набор программ, которые в комплексе будут решать следующие
-	задачи:
-	
+\begin{frame}{Внедрение библиотеки}
+	\begin{figure}
+		\input{schemes/gui_inject.tex}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Механизм подмены функций}
+	\begin{figure}
+		\includegraphics[height=0.8\textheight]{inject}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Искажение имен}
 	\begin{itemize}
-		\item запускать целевые приложения в специальном окружении
-		\item собирать информацию о существующих элементах графического приложения
-		\item сохранять информацию о всех запущенных приложениях
-		\item отображать пользователю окно для поиска и выбора элемента
-		\item активировать выбранный пользователем элемент
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Постановка задачи}
-	Набор программ должен быть реализован в виде следующих элементов:
-	
-	\begin{enumerate}
-		\item\label{lib} Библиотека для внедрения и сбора информации в конкретном
-		приложении.
-		\item Приложение для сохранения информации, полученой из нескольких
-		приложения с библиотекой из п.\ref{lib}.
-		\item Графический интерфейс для запуска приложений и отображения окна
-		палитры комманд.
-	\end{enumerate}
-\end{frame}
-
-\iffalse
-\begin{frame}{Общая архитектура}
-	\centering
-	\input{../schemes/arch.tex}
-\end{frame}
-\fi
-
-\begin{frame}{Генерация кода}
-	Искажение имен (name mangling):
-	\begin{itemize}		
 		\item \texttt{QCheckBox::QCheckBox(const QString\&, QWidget*)}
-		\item \texttt{\_ZN9QCheckBoxC1ERK7QStringP7QWidget\_f}
+		\item \texttt{\_ZN9QCheckBoxC1ERK7QStringP7QWidget}
+	\end{itemize}
+	\vspace{0.7cm}
+	\begin{itemize}
 		\item \texttt{void QAbstractButton::setText(const QString\&)}
-		\item \texttt{\_ZN15QAbstractButton7setTextERK7QString\_f}
+		\item \texttt{\_ZN15QAbstractButton7setTextERK7QString}
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Генерация кода}
-	Однотипный код
-	\begin{minted}{cpp}
-    typedef bool *func_f(int a, char* s);
-    static func_f real_func = 0;
-
-    bool func(int a, char* s)
-    {
-        if (!real_func)
-            real_func = (func_f)dlsym(RTLD_NEXT, "func");
-
-        if (initInject())
-            handle_for_func(a, s); // to change
-            
-        return real_func(a, s);
-    }
-	\end{minted}
+\begin{frame}{Архитектура системы}
+	\begin{figure}
+		\centering
+		\input{../schemes/arch.tex}
+	\end{figure}
 \end{frame}
 
 \begin{frame}[fragile]{Протокол}
@@ -201,6 +182,8 @@
 	\end{itemize}
 \end{frame}
 
-\frame{\titlepage}
+\begin{frame}[plain]
+	\titlepage
+\end{frame}
 
 \end{document}

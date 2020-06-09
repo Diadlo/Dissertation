@@ -1,0 +1,22 @@
+\begin{tikzpicture}[
+        ->,>=stealth',node
+        distance=1.5cm, semithick,
+        every edge/.append style={<->}
+    ]
+
+    \tikzstyle{block} = [rectangle,draw,minimum height=0.8cm]
+    \tikzstyle{bold} = [rectangle,draw,thick,minimum height=0.8cm,line width=1mm]
+
+    \node[block] (user) {Пользователь};
+    \node[block] (x11) [below of=user] {Графическая подсистема X11};
+    \node[block] (lib) [below of=x11] {Графическая библиотека Qt};
+    \node[bold] (inject) [below of=lib] {Внедряемый модуль};
+    \node[block] (app) [below of=inject] {Приложение};
+    \path[]
+        (user)   edge (x11)
+        (x11)    edge (lib)
+        (lib)    edge (inject)
+        (inject) edge (app)
+    ;
+
+\end{tikzpicture}
