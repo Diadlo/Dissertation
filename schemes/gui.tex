@@ -1,0 +1,19 @@
+\begin{tikzpicture}[
+        ->,>=stealth',node
+        distance=1.5cm, semithick,
+        every edge/.append style={<->}
+    ]
+
+    \tikzstyle{block} = [rectangle,draw,minimum height=0.8cm]
+
+    \node[block] (user) {Пользователь};
+    \node[block] (x11) [below of=user] {Графическая подсистема X11};
+    \node[block] (lib) [below of=x11] {Графическая библиотека Qt};
+    \node[block] (app) [below of=lib] {Приложение};
+    \path[]
+        (user) edge (x11)
+        (x11) edge (lib)
+        (lib)  edge (app)
+    ;
+
+\end{tikzpicture}
