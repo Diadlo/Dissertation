@@ -88,7 +88,8 @@
 \titleformat{\chapter}
 [block] % shape
 {\normalfont\bfseries\filcenter} % format
-{\chaptertitlename \thechapter.} % label
+%{\chaptertitlename~\thechapter.} % label
+{\thechapter} % label
 {5pt} % sep size
 {} % before code
 
@@ -96,7 +97,7 @@
 
 \titleformat{\section}[block]
 {\normalfont\bfseries\filcenter}
-{\thesection.}{5pt}{}
+{\thesection}{5pt}{}
 
 \titlespacing*{\section}{0pt}{7mm}{2pt}
 \titlespacing*{\subsection}{0pt}{7mm}{2pt}
@@ -104,7 +105,7 @@
 
 \titleformat{\subsection}[block]
 {\normalfont\itshape\filcenter}
-{\thesubsection.}{2pt}{}
+{\thesubsection}{3pt}{}
 
 %\parindent=1.25cm
 
