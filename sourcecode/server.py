@@ -1,3 +1,62 @@
+@dataclass
+class WidgetInfo:
+    addr: int
+    text: str
+
+@dataclass
+class Window:
+    wid: int
+    widgets: List[WidgetInfo] = field(default_factory=list)
+
+    def get_widget(self, addr):
+        return _find_one(self.widgets, lambda w: w.addr == addr)
+
+    def remove_widget_by_addr(self, addr):
+        self.widgets = [ w for w in self.widgets if w.addr != addr ]
+
+    def add_widget(self, widget):
+        self.widgets.append(widget)
+
+@dataclass
+class App:
+    pid: int
+    client: Socket
+    windows: List[Window] = field(default_factory=lambda: [Window(wid=0)])
+
+    def get_window(self, wid):
+        return _find_one(self.windows, lambda win: win.wid == wid)
+
+    def get_widget_and_window(self, addr):
+        for win in self.windows:
+            widget = win.get_widget(addr)
+            if widget is not None:
+                return (widget, win)
+
+        return (None, None)
+
+    def set_widget_window(self, addr, wid):
+        widget, old_win = self.get_widget_and_window(addr)
+
+        # Widget already added
+        assert(widget is not None)
+
+        old_win.remove_widget_by_addr(addr)
+        new_win = self.get_window(wid)
+        if new_win is None:
+            new_win = Window(wid)
+            self.windows.append(new_win)
+
+        new_win.add_widget(widget)
+
+    def set_widget_text(self, addr, text):
+        widget, window = self.get_widget_and_window(addr)
+        if widget is None:
+            widget = WidgetInfo(addr=addr, text=text)
+            window = self.get_window(0)
+            window.add_widget(widget)
+
+        widget.text = text
+
 class Server(QObject):
     def __init__(self):
         QObject.__init__(self)
@@ -48,9 +107,6 @@ class Server(QObject):
         widget = _find_one(last_window.widgets,
                 lambda widget: widget.text == widget_name)
 
-        print('Widget "{widget_name}" with addr {addr} activated'.format(
-            widget_name=widget.text, addr=hex(widget.addr)))
-
         self.__activate_widget(widget)
         _activate_window(last_window)
 
@@ -70,7 +126,6 @@ class Server(QObject):
         app = self.__get_app(pid)
         text = text.replace('&', '')
         app.set_widget_text(addr, text)
-        print(f'Widget "{text}" with addr {hex(addr)} added')
 
     def __set_widget_window(self, pid, addr, wid):
         app = self.__get_app(pid)
@@ -80,13 +135,11 @@ class Server(QObject):
         app = self.__get_app(pid)
         for window in app.windows:
             window.widgets = [w for w in window.widgets if w.addr != addr]
-        print('Widget with addr {} removed'.format(addr))
 
     def __activated(self, pid, wid):
         self.__last_window_id = wid
 
     def __handle_cmd(self, server, command):
-        print(f'[DEBUG] Handle cmd: {command}')
         if command == 'newApp':
             pid = _recv_uint64(server)
             socket_path = _recv_text(server)
@@ -114,10 +167,7 @@ class Server(QObject):
 
     def __loop(self):
         while self.__running:
-            print('[DEBUG] Loop iteration')
-            # TODO: Add timeout
             rlist = select.select([self.__socket], [], [])[0]
-            # HACK: Handle only first socket
             socket = rlist[0]
             if socket in rlist:
                 command = _recv_command(socket)

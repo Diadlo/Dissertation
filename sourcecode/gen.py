@@ -101,33 +101,3 @@ def parse_method(line):
         args_list = [a.strip() for a in args_str.split(',')]
 
     return (handler, result, classname, method, args_list)
-
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print('Usage: {} <input file> <output file>'
-                .format(sys.argv[0]))
-        sys.exit(1)
-
-    generated = []
-    in_name = sys.argv[1]
-    out_name = sys.argv[2]
-    with open(in_name, 'r') as f:
-        for ln in f:
-            if ln.startswith('//gen'):
-                args = parse_gen(ln)
-                generated += generate_func(*args)
-            elif ln.startswith('//method'):
-                (handler, result, classname, method,
-                        arg_types) = parse_method(ln)
-                mangled = func_mangling(classname, method,
-                        arg_types)
-                arg_types = [classname + '*'] + arg_types
-                arg_names = generate_args_names(arg_types)
-                generated += generate_func(handler, result,
-                        mangled, arg_types, arg_names)
-            else:
-                generated.append(ln)
-
-    with open(out_name, 'w') as f:
-        for ln in generated:
-            f.write(ln)

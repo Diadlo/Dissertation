@@ -1,3 +1,21 @@
+void updateButtonText(QAbstractButton* instance, const QString& text)
+{
+    if (text.isEmpty())
+      return;
+
+    setWidgetText(instance, text);
+    g_handlers[instance] = [=](){ instance->click(); };
+}
+
+void updateActionText(QAction* instance, const QString& text)
+{
+    if (text.isEmpty())
+      return;
+
+    setWidgetText(instance, text);
+    g_handlers[instance] = [=](){ instance->trigger(); };
+}
+
 void activateWidget()
 {
   timeval timeout;
