@@ -1,10 +1,11 @@
-\newpage
-\appendix
-\addtocontents{toc}{\vspace{5mm}\bfseries Приложения\par}
-
-\fancyhead{}
 \appendix
 \renewcommand{\thechapter}{\arabic{chapter}}
+
+\addtocontents{toc}{%
+	\protect\setlength{\cftchapnumwidth}{\widthof{\textbf{Приложение~99~}}}%
+	\protect\renewcommand*{\protect\cftchappresnum}{Приложение~}%
+}
+
 
 \titleformat{\chapter}
 [block] % shape
