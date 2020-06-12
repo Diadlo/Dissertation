@@ -1,9 +1,23 @@
 \newpage
 \appendix
 \addtocontents{toc}{\vspace{5mm}\bfseries Приложения\par}
-\footnotesize
 
-\input{appendix/helper_classes}
-\input{appendix/plane_interpolation}
-\input{appendix/sphere_interpolation}
-\input{appendix/orientation_interpolation}
+\fancyhead{}
+\appendix
+\renewcommand{\thechapter}{\arabic{chapter}}
+
+\titleformat{\chapter}
+[block] % shape
+{\normalfont\bfseries\filcenter} % format
+{\chaptertitlename~\thechapter} % label
+{5pt} % sep size
+{\\} % before code
+
+\chapter{Генератор функций обработчиков}
+\inputminted[fontsize=\footnotesize]{python}{sourcecode/gen.py}
+
+\chapter{Библиотека для внедрения}
+\inputminted[fontsize=\footnotesize]{cpp}{sourcecode/lib.cpp}
+
+\chapter{Серверная часть приложения управления}
+\inputminted[fontsize=\footnotesize]{python}{sourcecode/server.py}
