@@ -45,7 +45,8 @@ class Server(QObject):
     def activate(self, widget_name):
         """Activate widget with `widget_name` in last activated window."""
         last_window = self.__find_window_by_wid(self.__last_window_id)
-        widget = _find_one(last_window.widgets, lambda widget: widget.text == widget_name)
+        widget = _find_one(last_window.widgets,
+                lambda widget: widget.text == widget_name)
 
         print('Widget "{widget_name}" with addr {addr} activated'.format(
             widget_name=widget.text, addr=hex(widget.addr)))
