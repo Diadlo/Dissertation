@@ -21,11 +21,14 @@
 \setminted{fontsize=\small,baselinestretch=1}
 
 \usepackage{graphicx}
-\graphicspath{{../pictures/}}
+\graphicspath{{../pictures/}{example/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 
 \usepackage{tikz}
 \usetikzlibrary{automata,arrows,chains,shapes.geometric,positioning,calc}
+
+\usepackage{forloop}
+\newcounter{example}
 
 \title[Thesis]{Исследование возможности добавления палитры команд
 в произвольные приложения\\c использованием фреймворка Qt}
@@ -35,26 +38,22 @@
 \date{\the\year}
 
 \begin{document}
-	
+
 \begin{frame}[plain]
 	\titlepage
 \end{frame}
 
-\begin{frame}{Постановка задачи}
-	Разработать набор программ, которые в комплексе будут решать следующие
-	задачи:
-	
-	\begin{itemize}
-		\item Запускать целевые приложения в специальном окружении
-		\item Отображать пользователю окно для поиска и выбора элемента
-		\item Собирать информацию о существующих элементах графического приложения
-		\item Сохранять информацию о всех запущенных приложениях
-		\item Активировать выбранный пользователем элемент
-	\end{itemize}
-\end{frame}
-
 \begin{frame}{Палитра команд}
 	\includegraphics[width=\textwidth]{vscode}
+\end{frame}
+
+\begin{frame}{Цель работы}
+	\begin{itemize}
+		\item Поиск способа добавления новых возможностей\\
+		в собранное	ранее приложение
+		\item Реализовать систему для добавления палитры команд\\
+		в собранное ранее приложение
+	\end{itemize}
 \end{frame}
 
 \begin{frame}{Палитра команд в Plotinus}
@@ -74,7 +73,7 @@
 \end{frame}
 
 \begin{frame}{Добавление функциональности в приложение}
-	\textbf{Способы добавления дополнительной функциональности в приложение}
+	\textbf{Способы добавления дополнительной функциональности\\в приложение}
 	\begin{itemize}
 		\item Добавление функции на этапе сборки приложения
 		\item Добавление функции в момент выполнения программы
@@ -105,13 +104,22 @@
 
 \begin{frame}{Искажение имен}
 	\begin{itemize}
-		\item \texttt{QCheckBox::QCheckBox(const QString\&, QWidget*)}
-		\item \texttt{\_ZN9QCheckBoxC1ERK7QStringP7QWidget}
+		\item Было: \texttt{QCheckBox::QCheckBox(const QString\&, QWidget*)}
+		\item Стало: \texttt{\_ZN9QCheckBoxC1ERK7QStringP7QWidget}
 	\end{itemize}
 	\vspace{0.7cm}
 	\begin{itemize}
-		\item \texttt{void QAbstractButton::setText(const QString\&)}
-		\item \texttt{\_ZN15QAbstractButton7setTextERK7QString}
+		\item Было: \texttt{void QAbstractButton::setText(const QString\&)}
+		\item Стало: \texttt{\_ZN15QAbstractButton7setTextERK7QString}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Задачи реализации}
+	Реализовать:
+	\begin{itemize}
+		\item Генератор кода функций-обработчиков
+		\item Библиотеку для сбора информации
+		\item Приложение для отображения палитры команд
 	\end{itemize}
 \end{frame}
 
@@ -144,6 +152,7 @@
 \end{frame}
 \fi
 
+\iffalse
 \begin{frame}{Интерфейс}
     \begin{columns}
 		\column{0.58\linewidth}
@@ -154,27 +163,25 @@
 		\end{itemize}
 		\column{0.38\linewidth}
 		\includegraphics[width=3cm]{tray_ui}
-	\end{columns} 
-\end{frame}
-
-\begin{frame}{Интерфейс}
-    \begin{columns}
-		\column{0.5\linewidth}
-		\textbf{Запуск приложений}
-		\centering
-		\includegraphics[width=\textwidth]{start_ui}
-		\column{0.5\linewidth}
-		\textbf{Палитра команд}
-		\centering
-		\includegraphics[width=\textwidth]{control_ui}
 	\end{columns}
 \end{frame}
+\fi
+
+\forloop{example}{0}{\value{example} < 5}%
+{
+	\begin{frame}{Интерфейс}
+		\centering
+		\includegraphics[height=0.9\textheight]{example\theexample}
+	\end{frame}
+}
 
 \begin{frame}{Заключение}
 	\begin{itemize}
-		\item Реализована библиотека, для перехвата событий
-		\item Реализован вспомогательный генератор для расширения библиотеки
-		\item Разработано приложение для внедрения библиотеки и отображения палитры команд
+		\item Выбран подходящий способ добавления функции в приложение
+		\item Реализован генератор кода
+		\item Реализована внедряемая библиотека, для сбора информации\\
+		об элементах интерфейса
+		\item Реализовано приложение для отображения палитры команд
 	\end{itemize}
 \end{frame}
 
